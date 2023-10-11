@@ -1,7 +1,7 @@
 ---
 - name: Configure iptables rules
   hosts: vnode1
-  become: true  # You might need to become root to modify iptables rules
+  become: true 
 
   tasks:
     - name: allow established and related connections
