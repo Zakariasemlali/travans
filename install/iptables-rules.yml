@@ -1,0 +1,69 @@
+---
+- name: Configure iptables rules
+  hosts: vnode1
+  become: true  # You might need to become root to modify iptables rules
+
+  tasks:
+    - name: allow established and related connections
+      ansible.builtin.iptables:
+        chain: INPUT
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+
+    - name: Allow incoming SSH traffic
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: 22
+        jump: ACCEPT
+
+    - name: Allow incoming DNS (TCP)
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: 53
+        jump: ACCEPT
+
+
+    - name: Allow incoming DNS (UDP)
+      ansible.builtin.iptables:
+        chain: INPUT
+        state: present
+        protocol: udp
+        destination_port: 53
+        jump: ACCEPT
+
+
+    - name: Allow ICMP Type 3 (Destination Unreachable)
+      ansible.builtin.iptables:
+        chain: INPUT
+        state: present
+        protocol: icmp
+        icmp_type: 3
+        ctstate: NEW,ESTABLISHED,RELATED
+        jump: ACCEPT
+
+
+    - name: Allow ICMP Type 11 (Time Exceeded)
+      ansible.builtin.iptables:
+        chain: INPUT
+        state: present
+        protocol: icmp
+        icmp_type: 11
+        ctstate: NEW,ESTABLISHED,RELATED
+        jump: ACCEPT
+
+
+    - name: Allow ICMP Type 12 (Parameter Problem)
+      ansible.builtin.iptables:
+        chain: INPUT
+        state: present
+        protocol: icmp
+        icmp_type: 12
+        ctstate: NEW,ESTABLISHED,RELATED
+        jump: ACCEPT
+
+    - name: Drop all other incoming traffic
+      ansible.builtin.iptables:
+        chain: INPUT
+        jump: DROP
